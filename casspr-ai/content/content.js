@@ -1,5 +1,5 @@
 // content/content.js
-// Plume Extension - Twitter/X Content Script
+// Casspr Extension - Twitter/X Content Script
 
 (function() {
   'use strict';
@@ -41,12 +41,12 @@
   // Load state from storage
   async function loadState() {
     try {
-      const stored = await chrome.storage.local.get('plumeState');
-      if (stored.plumeState) {
-        state = { ...state, ...stored.plumeState };
+      const stored = await chrome.storage.local.get('cassprState');
+      if (stored.cassprState) {
+        state = { ...state, ...stored.cassprState };
       }
     } catch (error) {
-      console.error('[Plume] Failed to load state:', error);
+      console.error('[Casspr] Failed to load state:', error);
     }
   }
 
@@ -67,37 +67,41 @@
   // Create suggestion panel
   function createSuggestionPanel() {
     const panel = document.createElement('div');
-    panel.id = 'plume-suggestion-panel';
+    panel.id = 'casspr-suggestion-panel';
     panel.innerHTML = `
-      <div class="plume-panel-header">
-        <div class="plume-logo">
+      <div class="casspr-panel-header">
+        <div class="casspr-logo">
           <svg viewBox="0 0 24 24" width="20" height="20">
-            <defs>
-              <linearGradient id="plume-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#6366F1"/>
-                <stop offset="100%" style="stop-color:#8B5CF6"/>
-              </linearGradient>
-            </defs>
-            <path fill="url(#plume-icon-gradient)" d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76zM16.95 7.05a4 4 0 0 1 0 5.66L11.29 18.5H7v-4.29l5.79-5.79a4 4 0 0 1 5.66 0z"/>
+            <rect width="24" height="24" rx="5" fill="#000000"/>
+            <g transform="translate(12, 12)">
+              <path
+                d="M 5.2 -3.3
+                   A 6.3 6.3 0 1 0 5.2 3.3"
+                fill="none"
+                stroke="#FFFFFF"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </g>
           </svg>
-          <span>Plume</span>
+          <span>Casspr</span>
         </div>
-        <button class="plume-close-btn" id="plume-close" aria-label="Close">
+        <button class="casspr-close-btn" id="casspr-close" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
         </button>
       </div>
-      <div class="plume-panel-content">
-        <div class="plume-loading" id="plume-loading">
-          <div class="plume-spinner"></div>
+      <div class="casspr-panel-content">
+        <div class="casspr-loading" id="casspr-loading">
+          <div class="casspr-spinner"></div>
           <span>Crafting suggestions...</span>
         </div>
-        <div class="plume-suggestions" id="plume-suggestions"></div>
+        <div class="casspr-suggestions" id="casspr-suggestions"></div>
       </div>
-      <div class="plume-panel-footer">
-        <button class="plume-regenerate-btn" id="plume-regenerate">
+      <div class="casspr-panel-footer">
+        <button class="casspr-regenerate-btn" id="casspr-regenerate">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M23 4v6h-6M1 20v-6h6"/>
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
@@ -110,8 +114,8 @@
     document.body.appendChild(panel);
 
     // Event listeners
-    panel.querySelector('#plume-close').addEventListener('click', hideSuggestionPanel);
-    panel.querySelector('#plume-regenerate').addEventListener('click', () => {
+    panel.querySelector('#casspr-close').addEventListener('click', hideSuggestionPanel);
+    panel.querySelector('#casspr-regenerate').addEventListener('click', () => {
       if (currentTweet && !isGenerating) {
         requestSuggestions(currentTweet);
       }
@@ -130,11 +134,11 @@
 
     // Position panel near the reply button
     positionPanel(anchorElement);
-    suggestionPanel.classList.add('plume-visible');
+    suggestionPanel.classList.add('casspr-visible');
 
     // Show loading state
-    const loadingEl = suggestionPanel.querySelector('#plume-loading');
-    const suggestionsEl = suggestionPanel.querySelector('#plume-suggestions');
+    const loadingEl = suggestionPanel.querySelector('#casspr-loading');
+    const suggestionsEl = suggestionPanel.querySelector('#casspr-suggestions');
     if (loadingEl) loadingEl.style.display = 'flex';
     if (suggestionsEl) suggestionsEl.innerHTML = '';
 
@@ -173,7 +177,7 @@
   // Hide suggestion panel
   function hideSuggestionPanel() {
     if (suggestionPanel) {
-      suggestionPanel.classList.remove('plume-visible');
+      suggestionPanel.classList.remove('casspr-visible');
     }
     currentTweet = null;
     isGenerating = false;
@@ -182,15 +186,15 @@
   // Request suggestions from service worker
   function requestSuggestions(tweet) {
     if (!state.apiKey) {
-      displayError('Please configure your API key in the Plume extension popup.');
+      displayError('Please configure your API key in the Casspr extension popup.');
       return;
     }
 
     isGenerating = true;
 
     // Show loading
-    const loadingEl = suggestionPanel?.querySelector('#plume-loading');
-    const suggestionsEl = suggestionPanel?.querySelector('#plume-suggestions');
+    const loadingEl = suggestionPanel?.querySelector('#casspr-loading');
+    const suggestionsEl = suggestionPanel?.querySelector('#casspr-suggestions');
     if (loadingEl) loadingEl.style.display = 'flex';
     if (suggestionsEl) suggestionsEl.innerHTML = '';
 
@@ -220,8 +224,8 @@
 
     if (!suggestionPanel) return;
 
-    const loadingEl = suggestionPanel.querySelector('#plume-loading');
-    const suggestionsEl = suggestionPanel.querySelector('#plume-suggestions');
+    const loadingEl = suggestionPanel.querySelector('#casspr-loading');
+    const suggestionsEl = suggestionPanel.querySelector('#casspr-suggestions');
 
     if (loadingEl) loadingEl.style.display = 'none';
 
@@ -232,17 +236,17 @@
 
     if (suggestionsEl) {
       suggestionsEl.innerHTML = suggestions.map((suggestion, i) => `
-        <div class="plume-suggestion" data-index="${i}">
-          <p class="plume-suggestion-text">${escapeHtml(suggestion)}</p>
-          <div class="plume-suggestion-actions">
-            <button class="plume-copy-btn" data-suggestion="${escapeAttr(suggestion)}" title="Copy to clipboard">
+        <div class="casspr-suggestion" data-index="${i}">
+          <p class="casspr-suggestion-text">${escapeHtml(suggestion)}</p>
+          <div class="casspr-suggestion-actions">
+            <button class="casspr-copy-btn" data-suggestion="${escapeAttr(suggestion)}" title="Copy to clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
               </svg>
               Copy
             </button>
-            <button class="plume-use-btn" data-suggestion="${escapeAttr(suggestion)}" title="Insert into reply">
+            <button class="casspr-use-btn" data-suggestion="${escapeAttr(suggestion)}" title="Insert into reply">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13"/>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -265,14 +269,14 @@
   function displayError(message) {
     if (!suggestionPanel) return;
 
-    const loadingEl = suggestionPanel.querySelector('#plume-loading');
-    const suggestionsEl = suggestionPanel.querySelector('#plume-suggestions');
+    const loadingEl = suggestionPanel.querySelector('#casspr-loading');
+    const suggestionsEl = suggestionPanel.querySelector('#casspr-suggestions');
 
     if (loadingEl) loadingEl.style.display = 'none';
 
     if (suggestionsEl) {
       suggestionsEl.innerHTML = `
-        <div class="plume-error">
+        <div class="casspr-error">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" y1="8" x2="12" y2="12"/>
@@ -286,19 +290,19 @@
 
   // Bind events to suggestion buttons
   function bindSuggestionEvents(container) {
-    container.querySelectorAll('.plume-copy-btn').forEach(btn => {
+    container.querySelectorAll('.casspr-copy-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const text = btn.dataset.suggestion;
         try {
           await navigator.clipboard.writeText(text);
           showButtonFeedback(btn, 'Copied!');
         } catch (error) {
-          console.error('[Plume] Copy failed:', error);
+          console.error('[Casspr] Copy failed:', error);
         }
       });
     });
 
-    container.querySelectorAll('.plume-use-btn').forEach(btn => {
+    container.querySelectorAll('.casspr-use-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const text = btn.dataset.suggestion;
         insertIntoComposer(text);
@@ -316,10 +320,10 @@
       </svg>
       ${text}
     `;
-    btn.classList.add('plume-btn-success');
+    btn.classList.add('casspr-btn-success');
     setTimeout(() => {
       btn.innerHTML = originalHTML;
-      btn.classList.remove('plume-btn-success');
+      btn.classList.remove('casspr-btn-success');
     }, 2000);
   }
 
@@ -371,7 +375,7 @@
 
       if (attempts >= maxAttempts) {
         clearInterval(checkComposer);
-        console.warn('[Plume] Could not find composer');
+        console.warn('[Casspr] Could not find composer');
       }
     }, 100);
   }
@@ -379,11 +383,11 @@
   // Update usage stats
   async function updateStats() {
     try {
-      const stored = await chrome.storage.local.get('plumeState');
-      const plumeState = stored.plumeState || {};
+      const stored = await chrome.storage.local.get('cassprState');
+      const cassprState = stored.cassprState || {};
 
       const today = new Date().toDateString();
-      const stats = plumeState.stats || { repliesGenerated: 0, tweetsAnalyzed: 0, lastReset: today };
+      const stats = cassprState.stats || { repliesGenerated: 0, tweetsAnalyzed: 0, lastReset: today };
 
       // Reset if new day
       if (stats.lastReset !== today) {
@@ -395,10 +399,10 @@
       stats.repliesGenerated++;
 
       await chrome.storage.local.set({
-        plumeState: { ...plumeState, stats }
+        cassprState: { ...cassprState, stats }
       });
     } catch (error) {
-      console.error('[Plume] Failed to update stats:', error);
+      console.error('[Casspr] Failed to update stats:', error);
     }
   }
 
@@ -468,7 +472,7 @@
     // Close panel when clicking outside
     document.addEventListener('click', (e) => {
       if (suggestionPanel &&
-          suggestionPanel.classList.contains('plume-visible') &&
+          suggestionPanel.classList.contains('casspr-visible') &&
           !suggestionPanel.contains(e.target) &&
           !e.target.closest(SELECTORS.replyBtn)) {
         hideSuggestionPanel();
@@ -477,7 +481,7 @@
 
     // Close panel on Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && suggestionPanel?.classList.contains('plume-visible')) {
+      if (e.key === 'Escape' && suggestionPanel?.classList.contains('casspr-visible')) {
         hideSuggestionPanel();
       }
     });
@@ -485,7 +489,7 @@
     // Reposition panel on scroll (with debounce)
     let scrollTimeout;
     window.addEventListener('scroll', () => {
-      if (suggestionPanel?.classList.contains('plume-visible')) {
+      if (suggestionPanel?.classList.contains('casspr-visible')) {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
           if (currentTweet?.element) {
@@ -500,7 +504,7 @@
 
     // Reposition on window resize
     window.addEventListener('resize', () => {
-      if (suggestionPanel?.classList.contains('plume-visible') && currentTweet?.element) {
+      if (suggestionPanel?.classList.contains('casspr-visible') && currentTweet?.element) {
         const replyBtn = currentTweet.element.querySelector(SELECTORS.replyBtn);
         if (replyBtn) {
           positionPanel(replyBtn);
@@ -508,7 +512,7 @@
       }
     });
 
-    console.log('%c[Plume] Content script loaded', 'color: #8B5CF6; font-weight: bold;');
+    console.log('%c[Casspr] Content script loaded', 'color: #FFFFFF; background: #000000; padding: 2px 6px; border-radius: 3px; font-weight: bold;');
   }
 
   // Start when DOM is ready

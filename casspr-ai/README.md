@@ -1,8 +1,8 @@
-# Plume - AI Tweet Engagement
+# Casspr - AI Tweet Engagement
 
-**Craft replies that resonate.**
+**Making social media and marketing effortless and affordable for every startup.**
 
-Plume is a client-side Chrome extension that helps you grow your Twitter/X presence by generating AI-powered reply suggestions based on your interests, expertise, and communication style.
+Casspr is a client-side Chrome extension that helps you grow your Twitter/X presence by generating AI-powered reply suggestions based on your interests, expertise, and communication style.
 
 ## Features
 
@@ -10,7 +10,7 @@ Plume is a client-side Chrome extension that helps you grow your Twitter/X prese
 - **Multiple AI Providers**: Support for OpenAI, Anthropic (Claude), and Groq
 - **Personalized Voice**: Configure your expertise, communication style, and tone
 - **100% Client-Side**: Your API key stays in your browser - no data sent to third parties
-- **Beautiful Dark UI**: Seamlessly blends with Twitter's dark mode
+- **Sleek Dark UI**: Minimalist black and white design that blends with Twitter's dark mode
 
 ## Installation
 
@@ -19,18 +19,18 @@ Plume is a client-side Chrome extension that helps you grow your Twitter/X prese
 1. Clone or download this repository
 2. Install dependencies and generate icons:
    ```bash
-   cd plume-extension
+   cd casspr-ai
    npm install
    ```
 3. Open Chrome and navigate to `chrome://extensions`
 4. Enable **Developer mode** (toggle in top right)
 5. Click **Load unpacked**
-6. Select the `plume-extension` folder
-7. The Plume icon should appear in your extensions toolbar
+6. Select the `casspr-ai` folder
+7. The Casspr icon should appear in your extensions toolbar
 
 ### Setup
 
-1. Click the Plume extension icon
+1. Click the Casspr extension icon
 2. Select your preferred AI provider (OpenAI, Anthropic, or Groq)
 3. Enter your API key
 4. Choose your topics of expertise
@@ -41,7 +41,7 @@ Plume is a client-side Chrome extension that helps you grow your Twitter/X prese
 
 1. Navigate to Twitter/X (twitter.com or x.com)
 2. Click the reply button on any tweet
-3. The Plume suggestion panel will appear automatically
+3. The Casspr suggestion panel will appear automatically
 4. Choose from 3 AI-generated reply options
 5. Click **Use** to insert into the reply composer, or **Copy** to clipboard
 
@@ -60,7 +60,7 @@ Your API key is stored locally in Chrome's extension storage and is only used to
 ### Project Structure
 
 ```
-plume-extension/
+casspr-ai/
 ├── manifest.json          # Extension manifest (Manifest V3)
 ├── package.json           # Node.js dependencies
 ├── popup/
@@ -96,12 +96,12 @@ npm run generate-icons
 
 1. Edit the relevant files
 2. Go to `chrome://extensions`
-3. Click the refresh icon on the Plume extension card
+3. Click the refresh icon on the Casspr extension card
 4. Reload the Twitter/X tab to see changes
 
 ## Privacy
 
-- **No Server**: Plume runs entirely in your browser
+- **No Server**: Casspr runs entirely in your browser
 - **No Tracking**: We don't collect any usage data
 - **Your Keys**: API keys are stored locally and never leave your browser
 - **Direct API Calls**: Requests go directly to your chosen AI provider
@@ -128,4 +128,4 @@ MIT License - feel free to modify and distribute.
 
 ---
 
-**Plume v1.0.0** | Craft thoughtful replies that resonate
+**Casspr v1.0.0** | Making social media effortless for every startup

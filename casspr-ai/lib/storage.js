@@ -1,7 +1,7 @@
 // lib/storage.js
-// Shared storage utilities for Plume extension
+// Shared storage utilities for Casspr extension
 
-const PlumeStorage = {
+const CassprStorage = {
   async get(key) {
     const result = await chrome.storage.local.get(key);
     return result[key];
@@ -12,12 +12,12 @@ const PlumeStorage = {
   },
 
   async getState() {
-    return await this.get('plumeState') || {};
+    return await this.get('cassprState') || {};
   },
 
   async setState(updates) {
     const current = await this.getState();
-    await this.set('plumeState', { ...current, ...updates });
+    await this.set('cassprState', { ...current, ...updates });
   },
 
   async clearAll() {
@@ -27,5 +27,5 @@ const PlumeStorage = {
 
 // Make available globally for content scripts
 if (typeof window !== 'undefined') {
-  window.PlumeStorage = PlumeStorage;
+  window.CassprStorage = CassprStorage;
 }

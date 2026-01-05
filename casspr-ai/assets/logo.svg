@@ -1,0 +1,21 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="casspr-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#E8E8E8;stop-opacity:0.95"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="128" height="128" rx="28" fill="#000000"/>
+  <!-- The iconic C shape - wide opening on right like cassprAIR logo -->
+  <g transform="translate(64, 64)">
+    <path
+      d="M 28 -18
+         A 34 34 0 1 0 28 18"
+      fill="none"
+      stroke="url(#casspr-glow)"
+      stroke-width="8"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>

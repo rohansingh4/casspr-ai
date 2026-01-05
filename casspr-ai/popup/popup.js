@@ -1,7 +1,7 @@
 // popup/popup.js
-// Plume Extension - Popup Controller
+// Casspr Extension - Popup Controller
 
-class PlumePopup {
+class CassprPopup {
   constructor() {
     this.state = {
       isConfigured: false,
@@ -34,9 +34,9 @@ class PlumePopup {
   // Storage Methods
   async loadState() {
     try {
-      const stored = await chrome.storage.local.get('plumeState');
-      if (stored.plumeState) {
-        this.state = { ...this.state, ...stored.plumeState };
+      const stored = await chrome.storage.local.get('cassprState');
+      if (stored.cassprState) {
+        this.state = { ...this.state, ...stored.cassprState };
       }
       // Check if we need to reset daily stats
       this.checkDailyReset();
@@ -47,7 +47,7 @@ class PlumePopup {
 
   async saveState() {
     try {
-      await chrome.storage.local.set({ plumeState: this.state });
+      await chrome.storage.local.set({ cassprState: this.state });
       // Notify content script of state change
       this.notifyContentScript();
     } catch (error) {
@@ -129,7 +129,7 @@ class PlumePopup {
       this.state.isConfigured = true;
       await this.saveState();
       this.showView('dashboard');
-      this.showToast('Setup complete! Plume is ready.', 'success');
+      this.showToast('Setup complete! Casspr is ready.', 'success');
     });
 
     // Dashboard
@@ -480,5 +480,5 @@ class PlumePopup {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new PlumePopup();
+  new CassprPopup();
 });

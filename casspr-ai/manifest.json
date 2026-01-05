@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Plume - AI Tweet Engagement",
+  "name": "Casspr - AI Tweet Engagement",
   "version": "1.0.0",
-  "description": "Craft replies that resonate. AI-powered engagement suggestions for Twitter/X.",
+  "description": "Making social media and marketing effortless and affordable for every startup.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -33,6 +33,7 @@
     "https://x.com/*",
     "https://api.openai.com/*",
     "https://api.anthropic.com/*",
-    "https://api.groq.com/*"
+    "https://api.groq.com/*",
+    "https://generativelanguage.googleapis.com/*"
   ]
 }

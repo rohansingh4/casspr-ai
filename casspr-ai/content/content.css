@@ -1,14 +1,14 @@
 /* content/content.css */
-/* Plume Extension - Twitter/X Injection Styles */
+/* Casspr Extension - Twitter/X Injection Styles */
 
 /* Panel Container */
-#plume-suggestion-panel {
+#casspr-suggestion-panel {
   position: absolute;
   width: 340px;
-  background: #1A1A24;
-  border: 1px solid #2E2E3E;
+  background: #0A0A0C;
+  border: 1px solid #1A1A1E;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
   z-index: 9999;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   opacity: 0;
@@ -18,36 +18,37 @@
   overflow: hidden;
 }
 
-#plume-suggestion-panel.plume-visible {
+#casspr-suggestion-panel.casspr-visible {
   opacity: 1;
   visibility: visible;
   transform: translateY(0) scale(1);
 }
 
 /* Panel Header */
-.plume-panel-header {
+.casspr-panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #2E2E3E;
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+  border-bottom: 1px solid #1A1A1E;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
 }
 
-.plume-logo {
+.casspr-logo {
   display: flex;
   align-items: center;
   gap: 8px;
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
-.plume-logo svg {
+.casspr-logo svg {
   flex-shrink: 0;
 }
 
-.plume-close-btn {
+.casspr-close-btn {
   width: 28px;
   height: 28px;
   display: flex;
@@ -55,86 +56,86 @@
   justify-content: center;
   background: none;
   border: none;
-  color: #6B6B7B;
+  color: #6B6B75;
   cursor: pointer;
   border-radius: 6px;
   transition: all 150ms ease;
 }
 
-.plume-close-btn:hover {
-  background: #252532;
+.casspr-close-btn:hover {
+  background: #1A1A1E;
   color: #FFFFFF;
 }
 
 /* Panel Content */
-.plume-panel-content {
+.casspr-panel-content {
   padding: 12px 16px;
   max-height: 300px;
   overflow-y: auto;
 }
 
-.plume-panel-content::-webkit-scrollbar {
+.casspr-panel-content::-webkit-scrollbar {
   width: 6px;
 }
 
-.plume-panel-content::-webkit-scrollbar-track {
+.casspr-panel-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.plume-panel-content::-webkit-scrollbar-thumb {
-  background: #3E3E4E;
+.casspr-panel-content::-webkit-scrollbar-thumb {
+  background: #2A2A30;
   border-radius: 3px;
 }
 
-.plume-panel-content::-webkit-scrollbar-thumb:hover {
-  background: #4E4E5E;
+.casspr-panel-content::-webkit-scrollbar-thumb:hover {
+  background: #3A3A42;
 }
 
 /* Loading State */
-.plume-loading {
+.casspr-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   padding: 32px 24px;
-  color: #A0A0B0;
+  color: #8A8A95;
   font-size: 13px;
 }
 
-.plume-spinner {
+.casspr-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #252532;
-  border-top-color: #8B5CF6;
+  border: 3px solid #1A1A1E;
+  border-top-color: #FFFFFF;
   border-radius: 50%;
-  animation: plume-spin 0.8s linear infinite;
+  animation: casspr-spin 0.8s linear infinite;
 }
 
-@keyframes plume-spin {
+@keyframes casspr-spin {
   to { transform: rotate(360deg); }
 }
 
 /* Suggestions */
-.plume-suggestions {
+.casspr-suggestions {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.plume-suggestion {
-  background: #252532;
+.casspr-suggestion {
+  background: #101014;
   border-radius: 12px;
   padding: 12px;
   transition: all 150ms ease;
   border: 1px solid transparent;
 }
 
-.plume-suggestion:hover {
-  background: #2A2A3A;
-  border-color: rgba(99, 102, 241, 0.2);
+.casspr-suggestion:hover {
+  background: #151518;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.plume-suggestion-text {
+.casspr-suggestion-text {
   color: #FFFFFF;
   font-size: 14px;
   line-height: 1.5;
@@ -142,13 +143,13 @@
   word-wrap: break-word;
 }
 
-.plume-suggestion-actions {
+.casspr-suggestion-actions {
   display: flex;
   gap: 8px;
 }
 
-.plume-copy-btn,
-.plume-use-btn {
+.casspr-copy-btn,
+.casspr-use-btn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -162,42 +163,42 @@
   font-family: inherit;
 }
 
-.plume-copy-btn {
-  background: #2E2E3E;
-  color: #A0A0B0;
+.casspr-copy-btn {
+  background: #1A1A1E;
+  color: #8A8A95;
 }
 
-.plume-copy-btn:hover {
-  background: #3E3E4E;
+.casspr-copy-btn:hover {
+  background: #252528;
   color: #FFFFFF;
 }
 
-.plume-copy-btn.plume-btn-success {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10B981;
+.casspr-copy-btn.casspr-btn-success {
+  background: rgba(0, 210, 106, 0.15);
+  color: #00D26A;
 }
 
-.plume-use-btn {
-  background: linear-gradient(135deg, #6366F1, #8B5CF6);
-  color: #FFFFFF;
+.casspr-use-btn {
+  background: #FFFFFF;
+  color: #000000;
 }
 
-.plume-use-btn:hover {
+.casspr-use-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
-.plume-use-btn:active {
+.casspr-use-btn:active {
   transform: translateY(0);
 }
 
 /* Panel Footer */
-.plume-panel-footer {
+.casspr-panel-footer {
   padding: 12px 16px;
-  border-top: 1px solid #2E2E3E;
+  border-top: 1px solid #1A1A1E;
 }
 
-.plume-regenerate-btn {
+.casspr-regenerate-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,9 +206,9 @@
   width: 100%;
   padding: 10px;
   background: transparent;
-  border: 1px solid #2E2E3E;
+  border: 1px solid #1A1A1E;
   border-radius: 8px;
-  color: #A0A0B0;
+  color: #8A8A95;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -215,35 +216,35 @@
   font-family: inherit;
 }
 
-.plume-regenerate-btn:hover {
-  border-color: #6366F1;
+.casspr-regenerate-btn:hover {
+  border-color: #FFFFFF;
   color: #FFFFFF;
-  background: rgba(99, 102, 241, 0.1);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.plume-regenerate-btn:active {
+.casspr-regenerate-btn:active {
   transform: scale(0.98);
 }
 
 /* Error State */
-.plume-error {
+.casspr-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   text-align: center;
   padding: 24px 16px;
-  color: #EF4444;
+  color: #FF4757;
   font-size: 13px;
   line-height: 1.5;
 }
 
-.plume-error svg {
+.casspr-error svg {
   opacity: 0.8;
 }
 
 /* Animation for new suggestions */
-@keyframes plume-fadeInUp {
+@keyframes casspr-fadeInUp {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -254,35 +255,35 @@
   }
 }
 
-.plume-suggestion {
-  animation: plume-fadeInUp 200ms ease forwards;
+.casspr-suggestion {
+  animation: casspr-fadeInUp 200ms ease forwards;
 }
 
-.plume-suggestion:nth-child(2) {
+.casspr-suggestion:nth-child(2) {
   animation-delay: 50ms;
 }
 
-.plume-suggestion:nth-child(3) {
+.casspr-suggestion:nth-child(3) {
   animation-delay: 100ms;
 }
 
 /* Dark mode overrides for Twitter's UI */
 @media (prefers-color-scheme: dark) {
-  #plume-suggestion-panel {
-    background: #1A1A24;
+  #casspr-suggestion-panel {
+    background: #0A0A0C;
   }
 }
 
 /* Ensure our styles don't leak */
-#plume-suggestion-panel * {
+#casspr-suggestion-panel * {
   box-sizing: border-box;
 }
 
-#plume-suggestion-panel button {
+#casspr-suggestion-panel button {
   outline: none;
 }
 
-#plume-suggestion-panel button:focus-visible {
-  outline: 2px solid #6366F1;
+#casspr-suggestion-panel button:focus-visible {
+  outline: 2px solid #FFFFFF;
   outline-offset: 2px;
 }

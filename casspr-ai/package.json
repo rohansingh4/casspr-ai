@@ -1,7 +1,7 @@
 {
-  "name": "plume-extension",
+  "name": "casspr-ai",
   "version": "1.0.0",
-  "description": "Plume - AI-powered Twitter/X engagement assistant Chrome extension",
+  "description": "Casspr - AI-powered Twitter/X engagement assistant Chrome extension",
   "private": true,
   "scripts": {
     "generate-icons": "node scripts/generate-icons.js",
