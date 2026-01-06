@@ -108,7 +108,7 @@ function testApiKeyFormats() {
   );
 
   // Test 1.5: Valid Gemini key format
-  const validGemini = 'AIzaSyAf_PzJDMzdgHxFcxEq1rM0JtxgvyGJHiw';
+  const validGemini = 'AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
   recordTest('API Key Formats', 'Valid Gemini key format',
     patterns.gemini.test(validGemini),
     validGemini.substring(0, 15) + '...'
