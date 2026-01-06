@@ -61,7 +61,7 @@ class CassprPopup {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (tab?.id && (tab.url?.includes('twitter.com') || tab.url?.includes('x.com'))) {
-        chrome.tabs.sendMessage(tab.id, { type: 'STATE_UPDATED', state: this.state });
+        chrome.tabs.sendMessage(tab.id, { type: 'STATE_UPDATED', state: this.state }).catch(() => {});
       }
     } catch (error) {
       // Content script might not be loaded, that's okay
@@ -182,12 +182,12 @@ class CassprPopup {
         // Open side panel when enabled - get current window first
         try {
           const currentWindow = await chrome.windows.getCurrent();
-          chrome.runtime.sendMessage({
+          await chrome.runtime.sendMessage({
             type: 'OPEN_SIDE_PANEL',
             windowId: currentWindow.id
-          });
+          }).catch(() => {});
         } catch (err) {
-          console.error('[Casspr] Failed to open side panel:', err);
+          // Service worker might not be ready, ignore
         }
       }
     });
@@ -369,7 +369,12 @@ class CassprPopup {
         type: 'TEST_API_KEY',
         provider: this.state.provider,
         apiKey: this.state.apiKey
-      });
+      }).catch(() => null);
+
+      if (!response) {
+        this.updateApiKeyStatus('error', 'Service unavailable - reload extension');
+        return;
+      }
 
       if (response?.success) {
         this.updateApiKeyStatus('success', 'Connected');

@@ -173,19 +173,38 @@
     return panel;
   }
 
+  // Check if extension context is still valid
+  function isContextValid() {
+    try {
+      return chrome.runtime && chrome.runtime.id;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Show suggestion panel
   function showSuggestionPanel(tweet, anchorElement) {
+    // Check if extension context is still valid
+    if (!isContextValid()) {
+      console.warn('[Casspr] Extension context invalidated - please refresh the page');
+      return;
+    }
+
     currentTweet = tweet;
 
     // Broadcast tweet selection to side panel
-    chrome.runtime.sendMessage({
-      type: 'TWEET_SELECTED',
-      tweet: {
-        text: tweet.text,
-        author: tweet.displayName,
-        handle: tweet.handle
-      }
-    }).catch(() => {}); // Side panel may not be open
+    try {
+      chrome.runtime.sendMessage({
+        type: 'TWEET_SELECTED',
+        tweet: {
+          text: tweet.text,
+          author: tweet.displayName,
+          handle: tweet.handle
+        }
+      }).catch(() => {}); // Side panel may not be open
+    } catch (e) {
+      // Context invalidated
+    }
 
     // If side panel mode is enabled, don't show floating panel
     if (state.useSidePanel) {
@@ -252,6 +271,8 @@
 
   // Request suggestions from service worker
   function requestSuggestions(tweet, roughInput = '') {
+    if (!isContextValid()) return;
+
     if (!state.apiKey) {
       displayError('Please configure your API key in the Casspr extension popup.');
       return;
@@ -267,25 +288,29 @@
     if (suggestionsEl) suggestionsEl.innerHTML = '';
     if (refinedEl) refinedEl.style.display = 'none';
 
-    chrome.runtime.sendMessage({
-      type: 'GENERATE_SUGGESTIONS',
-      tweet: {
-        text: tweet.text,
-        author: tweet.displayName,
-        handle: tweet.handle
-      },
-      config: {
-        provider: state.provider,
-        apiKey: state.apiKey,
-        expertise: state.expertise,
-        style: state.style,
-        tone: state.tone,
-        length: state.length,
-        includeEmojis: state.includeEmojis,
-        addHashtags: state.addHashtags,
-        roughInput: roughInput
-      }
-    });
+    try {
+      chrome.runtime.sendMessage({
+        type: 'GENERATE_SUGGESTIONS',
+        tweet: {
+          text: tweet.text,
+          author: tweet.displayName,
+          handle: tweet.handle
+        },
+        config: {
+          provider: state.provider,
+          apiKey: state.apiKey,
+          expertise: state.expertise,
+          style: state.style,
+          tone: state.tone,
+          length: state.length,
+          includeEmojis: state.includeEmojis,
+          addHashtags: state.addHashtags,
+          roughInput: roughInput
+        }
+      });
+    } catch (e) {
+      // Context invalidated
+    }
   }
 
   // Display suggestions in panel
