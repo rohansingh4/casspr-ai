@@ -81,15 +81,21 @@ async function handleGenerateSuggestions(tweet, config, tabId) {
 }
 
 function buildPrompt(tweet, config) {
-  const { expertise, style, tone, length, includeEmojis, addHashtags, roughInput } = config;
+  const { expertise, style, tone, length, includeEmojis, addHashtags, roughInput, platform } = config;
+  const isLinkedIn = platform === 'linkedin' || tweet.platform === 'linkedin';
 
   const toneDescription = tone < 33 ? 'friendly, warm, and approachable' :
                           tone > 66 ? 'authoritative, confident, and expert' :
                           'balanced, conversational, and engaging';
 
-  const lengthGuide = length === 'concise' ? '1-2 sentences, under 100 characters ideal' :
-                      length === 'detailed' ? '2-4 sentences, can use up to 280 characters' :
-                      '1-3 sentences, around 140-180 characters';
+  // LinkedIn has more room for longer comments
+  const lengthGuide = isLinkedIn
+    ? (length === 'concise' ? '1-2 sentences, focused and impactful' :
+       length === 'detailed' ? '2-4 sentences, insightful with clear value' :
+       '2-3 sentences, professional and engaging')
+    : (length === 'concise' ? '1-2 sentences, under 100 characters ideal' :
+       length === 'detailed' ? '2-4 sentences, can use up to 280 characters' :
+       '1-3 sentences, around 140-180 characters');
 
   const styleDescriptions = {
     professional: 'professional and polished',
@@ -99,59 +105,87 @@ function buildPrompt(tweet, config) {
     provocative: 'bold and thought-provoking'
   };
 
+  // For LinkedIn, default to professional style if not explicitly set
+  const effectiveStyle = isLinkedIn ? (style || 'professional') : style;
+
   const expertiseStr = expertise.length > 0
     ? `The user has expertise in: ${expertise.join(', ')}.`
     : '';
 
   const roughInputStr = roughInput
-    ? `\nUSER'S ROUGH IDEAS:\n"${roughInput}"\nTransform these rough thoughts into polished replies while preserving the core message.`
+    ? `\nUSER'S ROUGH IDEAS:\n"${roughInput}"\nTransform these rough thoughts into polished ${isLinkedIn ? 'comments' : 'replies'} while preserving the core message.`
     : '';
 
-  return `You are a Twitter engagement expert helping craft authentic replies.
+  // Platform-specific context
+  const platformContext = isLinkedIn
+    ? 'You are a LinkedIn engagement expert helping craft professional, insightful comments that build meaningful professional connections.'
+    : 'You are a Twitter engagement expert helping craft authentic replies.';
 
-TWEET TO REPLY TO:
-Author: ${tweet.author} (@${tweet.handle})
+  const authorFormat = isLinkedIn
+    ? `Author: ${tweet.author}`
+    : `Author: ${tweet.author} (@${tweet.handle})`;
+
+  const postType = isLinkedIn ? 'POST' : 'TWEET';
+  const actionType = isLinkedIn ? 'comment' : 'reply';
+
+  const guidelines = isLinkedIn
+    ? `GUIDELINES:
+1. Add professional value - share insights, ask thoughtful questions, or offer relevant expertise
+2. Be authentic and genuine - avoid generic "Great post!" comments
+3. Build on the conversation - reference specific points from the post
+4. Maintain professional tone appropriate for LinkedIn
+5. Encourage further discussion`
+    : `GUIDELINES:
+1. Add genuine value - insight, question, or unique perspective
+2. Be authentic - avoid generic responses
+3. Match the tweet's energy
+4. Spark conversation`;
+
+  return `${platformContext}
+
+${postType} TO ${actionType.toUpperCase()} TO:
+${authorFormat}
 Content: "${tweet.text}"
 ${roughInputStr}
 
 REQUIREMENTS:
-- Style: ${styleDescriptions[style] || style}
+- Style: ${styleDescriptions[effectiveStyle] || effectiveStyle}
 - Tone: ${toneDescription}
 - Length: ${lengthGuide}
 ${expertiseStr}
 ${includeEmojis ? '- Include 1-2 relevant emojis' : '- No emojis'}
-${addHashtags ? '- Add 1-2 relevant hashtags' : '- No hashtags'}
+${addHashtags ? (isLinkedIn ? '- No hashtags (not common in LinkedIn comments)' : '- Add 1-2 relevant hashtags') : '- No hashtags'}
 
-GUIDELINES:
-1. Add genuine value - insight, question, or unique perspective
-2. Be authentic - avoid generic responses
-3. Match the tweet's energy
-4. Spark conversation
+${guidelines}
 
-Generate exactly 3 different reply options.
+Generate exactly 3 different ${actionType} options.
 
 IMPORTANT: Return ONLY a JSON array with 3 strings. No markdown, no explanation.
-Example: ["Reply 1", "Reply 2", "Reply 3"]`;
+Example: ["${actionType.charAt(0).toUpperCase() + actionType.slice(1)} 1", "${actionType.charAt(0).toUpperCase() + actionType.slice(1)} 2", "${actionType.charAt(0).toUpperCase() + actionType.slice(1)} 3"]`;
 }
 
 // Handle real-time text refinement
 async function handleRefineText(text, originalTweet, config, tabId) {
-  const { provider, apiKey, style, tone } = config;
+  const { provider, apiKey, style, tone, platform } = config;
+  const isLinkedIn = platform === 'linkedin' || originalTweet?.platform === 'linkedin';
 
   if (!apiKey || !tabId || !text.trim()) {
     return;
   }
 
   const toneDescription = tone < 33 ? 'friendly' : tone > 66 ? 'authoritative' : 'balanced';
+  const postType = isLinkedIn ? 'post' : 'tweet';
+  const actionType = isLinkedIn ? 'comment' : 'reply';
+  const lengthGuide = isLinkedIn ? 'Keep it professional and concise.' : 'Keep it concise for Twitter (under 280 chars).';
 
-  const prompt = `Improve this Twitter reply while keeping the same meaning and intent.
+  const prompt = `Improve this ${actionType} while keeping the same meaning and intent.
 
-ORIGINAL TWEET: "${originalTweet?.text || ''}"
+ORIGINAL ${postType.toUpperCase()}: "${originalTweet?.text || ''}"
 
-USER'S DRAFT REPLY: "${text}"
+USER'S DRAFT ${actionType.toUpperCase()}: "${text}"
 
 Make it more ${style} and ${toneDescription}. Fix grammar, improve clarity, make it engaging.
-Keep it concise for Twitter (under 280 chars).
+${lengthGuide}
 
 Return ONLY the improved text, nothing else.`;
 

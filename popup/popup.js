@@ -60,7 +60,7 @@ class CassprPopup {
   async notifyContentScript() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id && (tab.url?.includes('twitter.com') || tab.url?.includes('x.com'))) {
+      if (tab?.id && (tab.url?.includes('twitter.com') || tab.url?.includes('x.com') || tab.url?.includes('linkedin.com'))) {
         chrome.tabs.sendMessage(tab.id, { type: 'STATE_UPDATED', state: this.state }).catch(() => {});
       }
     } catch (error) {
@@ -479,7 +479,7 @@ class CassprPopup {
 
     const providerEl = document.getElementById('currentProvider');
     if (providerEl) {
-      const names = { openai: 'OpenAI', anthropic: 'Anthropic', groq: 'Groq' };
+      const names = { openai: 'OpenAI', anthropic: 'Anthropic', groq: 'Groq', gemini: 'Gemini' };
       providerEl.textContent = names[this.state.provider] || this.state.provider;
     }
 

@@ -1,24 +1,44 @@
 // content/content.js
-// Casspr Extension - Twitter/X Content Script
+// Casspr Extension - Twitter/X & LinkedIn Content Script
 
 (function() {
   'use strict';
 
-  // Twitter/X DOM Selectors (updated for current Twitter structure)
+  // Detect current platform
+  const PLATFORM = window.location.hostname.includes('linkedin') ? 'linkedin' : 'twitter';
+
+  // Platform-specific DOM Selectors
   const SELECTORS = {
-    tweet: 'article[data-testid="tweet"]',
-    tweetText: '[data-testid="tweetText"]',
-    userName: '[data-testid="User-Name"]',
-    timestamp: 'time[datetime]',
-    replyBtn: '[data-testid="reply"]',
-    retweetBtn: '[data-testid="retweet"]',
-    likeBtn: '[data-testid="like"]',
-    replyComposer: '[data-testid="tweetTextarea_0"]',
-    tweetButton: '[data-testid="tweetButtonInline"]',
-    // Modal and dialog selectors
-    replyModal: '[aria-labelledby="modal-header"]',
-    composerRoot: '[data-testid="toolBar"]'
+    twitter: {
+      post: 'article[data-testid="tweet"]',
+      postText: '[data-testid="tweetText"]',
+      userName: '[data-testid="User-Name"]',
+      timestamp: 'time[datetime]',
+      replyBtn: '[data-testid="reply"]',
+      retweetBtn: '[data-testid="retweet"]',
+      likeBtn: '[data-testid="like"]',
+      composer: '[data-testid="tweetTextarea_0"]',
+      composerAlt: '[data-testid="tweetTextarea_0RichTextInputContainer"]',
+      tweetButton: '[data-testid="tweetButtonInline"]',
+      replyModal: '[aria-labelledby="modal-header"]',
+      composerRoot: '[data-testid="toolBar"]'
+    },
+    linkedin: {
+      post: '.feed-shared-update-v2, .occludable-update, [data-urn*="urn:li:activity"]',
+      postText: '.feed-shared-update-v2__description, .feed-shared-text, .break-words',
+      userName: '.feed-shared-actor__name, .update-components-actor__name',
+      timestamp: 'time, .feed-shared-actor__sub-description',
+      commentBtn: 'button[aria-label*="Comment"], button[aria-label*="comment"], .comment-button, .social-actions-button',
+      composer: '.comments-comment-box__form textarea, .comments-comment-texteditor textarea, [placeholder*="Add a comment"]',
+      composerAlt: '.ql-editor, [contenteditable="true"][role="textbox"]',
+      postButton: 'button[type="submit"], .comments-comment-box__submit-button'
+    }
   };
+
+  // Helper to get selector for current platform
+  function getSelector(key) {
+    return SELECTORS[PLATFORM]?.[key] || SELECTORS.twitter[key];
+  }
 
   // Extension State
   let state = {
@@ -184,6 +204,8 @@
 
   // Show suggestion panel
   function showSuggestionPanel(tweet, anchorElement) {
+    console.log('[Casspr] showSuggestionPanel called', { tweet, anchorElement, platform: PLATFORM });
+
     // Check if extension context is still valid
     if (!isContextValid()) {
       console.warn('[Casspr] Extension context invalidated - please refresh the page');
@@ -208,19 +230,28 @@
 
     // If side panel mode is enabled, don't show floating panel
     if (state.useSidePanel) {
+      console.log('[Casspr] Side panel mode enabled, skipping floating panel');
       // Just request suggestions - they'll be shown in side panel
       requestSuggestions(tweet);
       return;
     }
 
+    console.log('[Casspr] Creating/showing floating panel');
+
     // Show floating panel (default mode)
     if (!suggestionPanel) {
       suggestionPanel = createSuggestionPanel();
+      console.log('[Casspr] Panel created:', suggestionPanel);
     }
 
     // Position panel near the reply button
     positionPanel(anchorElement);
     suggestionPanel.classList.add('casspr-visible');
+    console.log('[Casspr] Panel positioned and made visible', {
+      top: suggestionPanel.style.top,
+      left: suggestionPanel.style.left,
+      classList: suggestionPanel.classList.toString()
+    });
 
     // Show loading state
     const loadingEl = suggestionPanel.querySelector('#casspr-loading');
@@ -294,7 +325,8 @@
         tweet: {
           text: tweet.text,
           author: tweet.displayName,
-          handle: tweet.handle
+          handle: tweet.handle,
+          platform: tweet.platform || PLATFORM
         },
         config: {
           provider: state.provider,
@@ -305,7 +337,8 @@
           length: state.length,
           includeEmojis: state.includeEmojis,
           addHashtags: state.addHashtags,
-          roughInput: roughInput
+          roughInput: roughInput,
+          platform: PLATFORM
         }
       });
     } catch (e) {
@@ -437,8 +470,17 @@
     }, 2000);
   }
 
-  // Insert text into Twitter's reply composer
+  // Insert text into reply/comment composer (platform-aware)
   function insertIntoComposer(text) {
+    if (PLATFORM === 'linkedin') {
+      insertIntoLinkedInComposer(text);
+    } else {
+      insertIntoTwitterComposer(text);
+    }
+  }
+
+  // Insert text into Twitter's reply composer
+  function insertIntoTwitterComposer(text) {
     // Wait for composer to appear (Twitter uses modal for replies)
     const maxAttempts = 30;
     let attempts = 0;
@@ -447,8 +489,8 @@
       attempts++;
 
       // Find the composer - try multiple selectors
-      const composer = document.querySelector(SELECTORS.replyComposer) ||
-                      document.querySelector('[data-testid="tweetTextarea_0RichTextInputContainer"]') ||
+      const composer = document.querySelector(getSelector('composer')) ||
+                      document.querySelector(getSelector('composerAlt')) ||
                       document.querySelector('[role="textbox"][data-testid]');
 
       if (composer) {
@@ -489,7 +531,66 @@
 
       if (attempts >= maxAttempts) {
         clearInterval(checkComposer);
-        console.warn('[Casspr] Could not find composer');
+        console.warn('[Casspr] Could not find Twitter composer');
+      }
+    }, 100);
+  }
+
+  // Insert text into LinkedIn's comment composer
+  function insertIntoLinkedInComposer(text) {
+    const maxAttempts = 30;
+    let attempts = 0;
+
+    const checkComposer = setInterval(() => {
+      attempts++;
+
+      // LinkedIn uses textarea or contenteditable
+      const textarea = document.querySelector(getSelector('composer'));
+      const contentEditable = document.querySelector(getSelector('composerAlt'));
+
+      if (textarea && textarea.tagName === 'TEXTAREA') {
+        clearInterval(checkComposer);
+
+        // For native textarea
+        textarea.focus();
+        textarea.value = text;
+
+        // Dispatch events to notify LinkedIn's React
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        textarea.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Track inserted text
+        lastInsertedText = text;
+
+      } else if (contentEditable && contentEditable.getAttribute('contenteditable') === 'true') {
+        clearInterval(checkComposer);
+
+        // For contenteditable (Quill editor)
+        contentEditable.focus();
+
+        // Clear and insert
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(contentEditable);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        document.execCommand('insertText', false, text);
+
+        contentEditable.dispatchEvent(new InputEvent('input', {
+          bubbles: true,
+          cancelable: true,
+          inputType: 'insertText',
+          data: text
+        }));
+
+        lastInsertedText = text;
+        startComposerMonitoring(contentEditable);
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(checkComposer);
+        console.warn('[Casspr] Could not find LinkedIn composer');
       }
     }, 100);
   }
@@ -605,11 +706,19 @@
     return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  // Parse tweet data from element
+  // Parse post data from element (platform-aware)
+  function parsePostFromElement(article) {
+    if (PLATFORM === 'linkedin') {
+      return parseLinkedInPost(article);
+    }
+    return parseTweetFromElement(article);
+  }
+
+  // Parse Twitter tweet data
   function parseTweetFromElement(article) {
-    const tweetText = article.querySelector(SELECTORS.tweetText);
-    const userName = article.querySelector(SELECTORS.userName);
-    const timeEl = article.querySelector(SELECTORS.timestamp);
+    const tweetText = article.querySelector(getSelector('postText'));
+    const userName = article.querySelector(getSelector('userName'));
+    const timeEl = article.querySelector(getSelector('timestamp'));
 
     const authorFull = userName?.innerText || '';
     const authorLines = authorFull.split('\n');
@@ -621,32 +730,72 @@
       displayName,
       handle: handle.replace('@', ''),
       timestamp: timeEl?.getAttribute('datetime') || '',
+      platform: 'twitter',
       element: article
     };
   }
 
-  // Handle reply button clicks
+  // Parse LinkedIn post data
+  function parseLinkedInPost(article) {
+    const postText = article.querySelector(getSelector('postText'));
+    const userName = article.querySelector(getSelector('userName'));
+    const timeEl = article.querySelector(getSelector('timestamp'));
+
+    // LinkedIn shows full name, not handles
+    const displayName = userName?.innerText?.trim()?.split('\n')[0] || 'Unknown';
+
+    return {
+      text: postText?.innerText || '',
+      displayName,
+      handle: '', // LinkedIn doesn't use handles
+      timestamp: timeEl?.getAttribute('datetime') || timeEl?.innerText || '',
+      platform: 'linkedin',
+      element: article
+    };
+  }
+
+  // Handle reply/comment button clicks
   function handleReplyClick(e) {
     // Wait for state to load before handling clicks
-    if (!stateLoaded) return;
-    if (!state.isEnabled || !state.apiKey) return;
+    if (!stateLoaded) {
+      console.log('[Casspr] State not loaded yet');
+      return;
+    }
+    if (!state.isEnabled || !state.apiKey) {
+      console.log('[Casspr] Not enabled or no API key', { isEnabled: state.isEnabled, hasKey: !!state.apiKey });
+      return;
+    }
 
-    const replyBtn = e.target.closest(SELECTORS.replyBtn);
-    if (!replyBtn) return;
+    // Detect reply/comment button based on platform
+    let actionBtn;
+    if (PLATFORM === 'linkedin') {
+      actionBtn = e.target.closest(getSelector('commentBtn'));
+      console.log('[Casspr] LinkedIn: Looking for comment button', { selector: getSelector('commentBtn'), found: !!actionBtn });
+    } else {
+      actionBtn = e.target.closest(getSelector('replyBtn'));
+    }
+    if (!actionBtn) return;
 
-    const article = replyBtn.closest(SELECTORS.tweet);
+    // Find the post container
+    const article = actionBtn.closest(getSelector('post'));
+    console.log('[Casspr] Found article:', { selector: getSelector('post'), found: !!article, article });
     if (!article) return;
 
-    const tweet = parseTweetFromElement(article);
+    const post = parsePostFromElement(article);
+    console.log('[Casspr] Parsed post:', post);
 
-    // Only show if there's actual tweet content
-    if (!tweet.text.trim()) return;
+    // Only show if there's actual post content
+    if (!post.text.trim()) {
+      console.log('[Casspr] No post text found, skipping');
+      return;
+    }
 
     // Show suggestion panel
     if (state.autoShow) {
-      // Small delay to let Twitter's reply modal start opening
+      console.log('[Casspr] autoShow enabled, showing panel in 100ms');
+      // Small delay to let the reply/comment modal start opening
       setTimeout(() => {
-        showSuggestionPanel(tweet, replyBtn);
+        showSuggestionPanel(post, actionBtn);
       }, 100);
     }
   }
@@ -663,7 +812,8 @@
       if (suggestionPanel &&
           suggestionPanel.classList.contains('casspr-visible') &&
           !suggestionPanel.contains(e.target) &&
-          !e.target.closest(SELECTORS.replyBtn)) {
+          !e.target.closest(getSelector('replyBtn')) &&
+          !e.target.closest(getSelector('commentBtn'))) {
         hideSuggestionPanel();
       }
     });
@@ -682,9 +832,10 @@
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
           if (currentTweet?.element) {
-            const replyBtn = currentTweet.element.querySelector(SELECTORS.replyBtn);
-            if (replyBtn) {
-              positionPanel(replyBtn);
+            const actionBtn = currentTweet.element.querySelector(getSelector('replyBtn')) ||
+                              currentTweet.element.querySelector(getSelector('commentBtn'));
+            if (actionBtn) {
+              positionPanel(actionBtn);
             }
           }
         }, 50);
@@ -694,14 +845,15 @@
     // Reposition on window resize
     window.addEventListener('resize', () => {
       if (suggestionPanel?.classList.contains('casspr-visible') && currentTweet?.element) {
-        const replyBtn = currentTweet.element.querySelector(SELECTORS.replyBtn);
-        if (replyBtn) {
-          positionPanel(replyBtn);
+        const actionBtn = currentTweet.element.querySelector(getSelector('replyBtn')) ||
+                          currentTweet.element.querySelector(getSelector('commentBtn'));
+        if (actionBtn) {
+          positionPanel(actionBtn);
         }
       }
     });
 
-    console.log('%c[Casspr] Content script loaded', 'color: #FFFFFF; background: #000000; padding: 2px 6px; border-radius: 3px; font-weight: bold;');
+    console.log(`%c[Casspr] Content script loaded (${PLATFORM})`, 'color: #FFFFFF; background: #000000; padding: 2px 6px; border-radius: 3px; font-weight: bold;');
   }
 
   // Start when DOM is ready

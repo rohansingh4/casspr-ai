@@ -204,10 +204,13 @@ class CassprSidePanel {
     this.isGenerating = true;
     this.showLoading();
 
+    // Determine platform from current tweet or default to twitter
+    const platform = this.currentTweet?.platform || 'twitter';
+
     // Send to service worker - it will broadcast suggestions back
     chrome.runtime.sendMessage({
       type: 'GENERATE_SUGGESTIONS',
-      tweet: this.currentTweet || { text: roughInput, author: 'You', handle: 'you' },
+      tweet: this.currentTweet || { text: roughInput, author: 'You', handle: 'you', platform: 'twitter' },
       config: {
         provider: this.state.provider,
         apiKey: this.state.apiKey,
@@ -217,7 +220,8 @@ class CassprSidePanel {
         length: this.state.length,
         includeEmojis: this.state.includeEmojis,
         addHashtags: this.state.addHashtags,
-        roughInput: roughInput
+        roughInput: roughInput,
+        platform: platform
       }
     });
   }
@@ -292,8 +296,14 @@ class CassprSidePanel {
     const emptyEl = document.getElementById('emptyState');
 
     if (this.currentTweet) {
-      if (authorEl) authorEl.textContent = `@${this.currentTweet.handle || 'username'}`;
-      if (textEl) textEl.textContent = this.currentTweet.text || 'No tweet text';
+      // Handle both Twitter (@handle) and LinkedIn (just name)
+      if (authorEl) {
+        const isLinkedIn = this.currentTweet.platform === 'linkedin' || !this.currentTweet.handle;
+        authorEl.textContent = isLinkedIn
+          ? this.currentTweet.author || 'Author'
+          : `@${this.currentTweet.handle || 'username'}`;
+      }
+      if (textEl) textEl.textContent = this.currentTweet.text || 'No post content';
       if (contextEl) {
         contextEl.style.display = 'block';
         contextEl.classList.add('has-tweet');
@@ -301,8 +311,8 @@ class CassprSidePanel {
       // Hide empty state when we have a tweet
       if (emptyEl) emptyEl.classList.add('hidden');
     } else {
-      if (authorEl) authorEl.textContent = '@username';
-      if (textEl) textEl.textContent = 'Select a tweet to reply...';
+      if (authorEl) authorEl.textContent = 'Author';
+      if (textEl) textEl.textContent = 'Select a post to reply...';
       if (contextEl) {
         contextEl.classList.remove('has-tweet');
       }
@@ -373,7 +383,7 @@ class CassprSidePanel {
     const emptyEl = document.getElementById('emptyState');
     if (emptyEl) {
       emptyEl.classList.remove('hidden');
-      emptyEl.querySelector('p').textContent = 'Click reply on a tweet to get AI suggestions';
+      emptyEl.querySelector('p').textContent = 'Click reply/comment to get AI suggestions';
     }
   }
 
