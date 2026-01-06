@@ -29,9 +29,37 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 10px 12px;
   border-bottom: 1px solid #1A1A1E;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+}
+
+/* Rough Input Section */
+.casspr-input-section {
+  padding: 8px 12px;
+  border-bottom: 1px solid #1A1A1E;
+}
+
+.casspr-rough-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: #101014;
+  border: 1px solid #1A1A1E;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 13px;
+  resize: none;
+  transition: border-color 150ms;
+}
+
+.casspr-rough-input:focus {
+  outline: none;
+  border-color: #3A3A42;
+}
+
+.casspr-rough-input::placeholder {
+  color: #5A5A65;
 }
 
 .casspr-logo {
@@ -148,19 +176,18 @@
   gap: 8px;
 }
 
-.casspr-copy-btn,
-.casspr-use-btn {
+/* Icon-only compact buttons */
+.casspr-icon-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: none;
   border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
   cursor: pointer;
   transition: all 150ms ease;
-  font-family: inherit;
 }
 
 .casspr-copy-btn {
@@ -184,12 +211,53 @@
 }
 
 .casspr-use-btn:hover {
-  transform: translateY(-1px);
+  transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
 .casspr-use-btn:active {
-  transform: translateY(0);
+  transform: scale(1);
+}
+
+/* Refined section */
+.casspr-refined {
+  background: #101014;
+  border: 1px solid #00D26A;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.casspr-refined-label {
+  font-size: 11px;
+  color: #00D26A;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.casspr-refined-text {
+  color: #FFFFFF;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0 0 10px 0;
+}
+
+.casspr-use-refined {
+  width: 100%;
+  padding: 8px;
+  background: #00D26A;
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.casspr-use-refined:hover {
+  background: #00E676;
 }
 
 /* Panel Footer */

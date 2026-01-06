@@ -31,12 +31,14 @@
     length: 'medium',
     autoShow: true,
     includeEmojis: false,
-    addHashtags: false
+    addHashtags: false,
+    useSidePanel: false
   };
 
   let currentTweet = null;
   let suggestionPanel = null;
   let isGenerating = false;
+  let stateLoaded = false;  // Track if state is loaded from storage
 
   // Load state from storage
   async function loadState() {
@@ -48,9 +50,25 @@
     } catch (error) {
       console.error('[Casspr] Failed to load state:', error);
     }
+    stateLoaded = true;  // Mark state as loaded (even on error, use defaults)
   }
 
-  // Listen for state updates from popup
+  // Listen for storage changes (when settings change in popup)
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'local' && changes.cassprState) {
+      const newState = changes.cassprState.newValue;
+      if (newState) {
+        state = { ...state, ...newState };
+
+        // If side panel mode was just enabled, hide floating panel
+        if (state.useSidePanel && suggestionPanel) {
+          hideSuggestionPanel();
+        }
+      }
+    }
+  });
+
+  // Listen for messages from popup/side panel/service worker
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'STATE_UPDATED') {
       state = { ...state, ...message.state };
@@ -61,8 +79,22 @@
     if (message.type === 'SUGGESTIONS_READY') {
       displaySuggestions(message.suggestions);
     }
+    if (message.type === 'INSERT_TEXT') {
+      insertIntoComposer(message.text);
+    }
+    if (message.type === 'REFINED_TEXT') {
+      showRefinedSuggestion(message.text);
+    }
     return true;
   });
+
+  // Track composer changes for real-time refinement
+  let composerObserver = null;
+  let refinementTimeout = null;
+  let lastInsertedText = '';
+
+  // Get extension icon URL
+  const iconUrl = chrome.runtime.getURL('icons/icon48.png');
 
   // Create suggestion panel
   function createSuggestionPanel() {
@@ -71,19 +103,7 @@
     panel.innerHTML = `
       <div class="casspr-panel-header">
         <div class="casspr-logo">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <rect width="24" height="24" rx="5" fill="#000000"/>
-            <g transform="translate(12, 12)">
-              <path
-                d="M 5.2 -3.3
-                   A 6.3 6.3 0 1 0 5.2 3.3"
-                fill="none"
-                stroke="#FFFFFF"
-                stroke-width="1.5"
-                stroke-linecap="round"
-              />
-            </g>
-          </svg>
+          <img src="${iconUrl}" width="20" height="20" alt="Casspr">
           <span>Casspr</span>
         </div>
         <button class="casspr-close-btn" id="casspr-close" aria-label="Close">
@@ -93,12 +113,20 @@
           </svg>
         </button>
       </div>
+      <div class="casspr-input-section">
+        <textarea id="casspr-rough-input" class="casspr-rough-input" placeholder="Type rough thoughts... (optional)" rows="2"></textarea>
+      </div>
       <div class="casspr-panel-content">
         <div class="casspr-loading" id="casspr-loading">
           <div class="casspr-spinner"></div>
           <span>Crafting suggestions...</span>
         </div>
         <div class="casspr-suggestions" id="casspr-suggestions"></div>
+        <div class="casspr-refined" id="casspr-refined" style="display:none;">
+          <div class="casspr-refined-label">Refined version:</div>
+          <p class="casspr-refined-text" id="casspr-refined-text"></p>
+          <button class="casspr-use-refined" id="casspr-use-refined">Use this</button>
+        </div>
       </div>
       <div class="casspr-panel-footer">
         <button class="casspr-regenerate-btn" id="casspr-regenerate">
@@ -117,7 +145,28 @@
     panel.querySelector('#casspr-close').addEventListener('click', hideSuggestionPanel);
     panel.querySelector('#casspr-regenerate').addEventListener('click', () => {
       if (currentTweet && !isGenerating) {
-        requestSuggestions(currentTweet);
+        const roughInput = panel.querySelector('#casspr-rough-input')?.value || '';
+        requestSuggestions(currentTweet, roughInput);
+      }
+    });
+
+    // Rough input enter key
+    panel.querySelector('#casspr-rough-input')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (currentTweet && !isGenerating) {
+          const roughInput = e.target.value || '';
+          requestSuggestions(currentTweet, roughInput);
+        }
+      }
+    });
+
+    // Use refined button
+    panel.querySelector('#casspr-use-refined')?.addEventListener('click', () => {
+      const refinedText = panel.querySelector('#casspr-refined-text')?.textContent;
+      if (refinedText) {
+        insertIntoComposer(refinedText);
+        hideSuggestionPanel();
       }
     });
 
@@ -126,11 +175,29 @@
 
   // Show suggestion panel
   function showSuggestionPanel(tweet, anchorElement) {
+    currentTweet = tweet;
+
+    // Broadcast tweet selection to side panel
+    chrome.runtime.sendMessage({
+      type: 'TWEET_SELECTED',
+      tweet: {
+        text: tweet.text,
+        author: tweet.displayName,
+        handle: tweet.handle
+      }
+    }).catch(() => {}); // Side panel may not be open
+
+    // If side panel mode is enabled, don't show floating panel
+    if (state.useSidePanel) {
+      // Just request suggestions - they'll be shown in side panel
+      requestSuggestions(tweet);
+      return;
+    }
+
+    // Show floating panel (default mode)
     if (!suggestionPanel) {
       suggestionPanel = createSuggestionPanel();
     }
-
-    currentTweet = tweet;
 
     // Position panel near the reply button
     positionPanel(anchorElement);
@@ -184,7 +251,7 @@
   }
 
   // Request suggestions from service worker
-  function requestSuggestions(tweet) {
+  function requestSuggestions(tweet, roughInput = '') {
     if (!state.apiKey) {
       displayError('Please configure your API key in the Casspr extension popup.');
       return;
@@ -195,8 +262,10 @@
     // Show loading
     const loadingEl = suggestionPanel?.querySelector('#casspr-loading');
     const suggestionsEl = suggestionPanel?.querySelector('#casspr-suggestions');
+    const refinedEl = suggestionPanel?.querySelector('#casspr-refined');
     if (loadingEl) loadingEl.style.display = 'flex';
     if (suggestionsEl) suggestionsEl.innerHTML = '';
+    if (refinedEl) refinedEl.style.display = 'none';
 
     chrome.runtime.sendMessage({
       type: 'GENERATE_SUGGESTIONS',
@@ -213,7 +282,8 @@
         tone: state.tone,
         length: state.length,
         includeEmojis: state.includeEmojis,
-        addHashtags: state.addHashtags
+        addHashtags: state.addHashtags,
+        roughInput: roughInput
       }
     });
   }
@@ -222,7 +292,8 @@
   function displaySuggestions(suggestions) {
     isGenerating = false;
 
-    if (!suggestionPanel) return;
+    // If side panel mode, don't update floating panel
+    if (state.useSidePanel || !suggestionPanel) return;
 
     const loadingEl = suggestionPanel.querySelector('#casspr-loading');
     const suggestionsEl = suggestionPanel.querySelector('#casspr-suggestions');
@@ -235,23 +306,22 @@
     }
 
     if (suggestionsEl) {
+      // Compact layout with icon-only buttons
       suggestionsEl.innerHTML = suggestions.map((suggestion, i) => `
         <div class="casspr-suggestion" data-index="${i}">
           <p class="casspr-suggestion-text">${escapeHtml(suggestion)}</p>
           <div class="casspr-suggestion-actions">
-            <button class="casspr-copy-btn" data-suggestion="${escapeAttr(suggestion)}" title="Copy to clipboard">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <button class="casspr-copy-btn casspr-icon-btn" data-suggestion="${escapeAttr(suggestion)}" title="Copy">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
               </svg>
-              Copy
             </button>
-            <button class="casspr-use-btn" data-suggestion="${escapeAttr(suggestion)}" title="Insert into reply">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="casspr-use-btn casspr-icon-btn" data-suggestion="${escapeAttr(suggestion)}" title="Use">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13"/>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"/>
               </svg>
-              Use
             </button>
           </div>
         </div>
@@ -265,9 +335,24 @@
     updateStats();
   }
 
+  // Show refined suggestion
+  function showRefinedSuggestion(text) {
+    // If side panel mode, don't update floating panel
+    if (state.useSidePanel || !suggestionPanel) return;
+
+    const refinedEl = suggestionPanel.querySelector('#casspr-refined');
+    const refinedTextEl = suggestionPanel.querySelector('#casspr-refined-text');
+
+    if (refinedEl && refinedTextEl && text) {
+      refinedTextEl.textContent = text;
+      refinedEl.style.display = 'block';
+    }
+  }
+
   // Display error in panel
   function displayError(message) {
-    if (!suggestionPanel) return;
+    // If side panel mode, don't update floating panel
+    if (state.useSidePanel || !suggestionPanel) return;
 
     const loadingEl = suggestionPanel.querySelector('#casspr-loading');
     const suggestionsEl = suggestionPanel.querySelector('#casspr-suggestions');
@@ -370,6 +455,10 @@
             inputType: 'insertText',
             data: text
           }));
+
+          // Track inserted text and start monitoring for edits
+          lastInsertedText = text;
+          startComposerMonitoring(editableDiv);
         }
       }
 
@@ -378,6 +467,79 @@
         console.warn('[Casspr] Could not find composer');
       }
     }, 100);
+  }
+
+  // Start monitoring composer for user edits
+  function startComposerMonitoring(editableDiv) {
+    // Stop any previous observer
+    if (composerObserver) {
+      composerObserver.disconnect();
+      composerObserver = null;
+    }
+    if (refinementTimeout) {
+      clearTimeout(refinementTimeout);
+      refinementTimeout = null;
+    }
+
+    // Create mutation observer to detect text changes
+    composerObserver = new MutationObserver(() => {
+      const currentText = editableDiv.innerText || editableDiv.textContent || '';
+
+      // Only trigger refinement if text has changed from what we inserted
+      if (currentText && currentText !== lastInsertedText && currentText.length > 10) {
+        // Debounce refinement requests
+        if (refinementTimeout) {
+          clearTimeout(refinementTimeout);
+        }
+
+        refinementTimeout = setTimeout(() => {
+          requestRefinement(currentText);
+        }, 1000); // Wait 1 second after user stops typing
+      }
+    });
+
+    // Observe the composer for changes
+    composerObserver.observe(editableDiv, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    // Also listen for input events as backup
+    editableDiv.addEventListener('input', () => {
+      const currentText = editableDiv.innerText || editableDiv.textContent || '';
+
+      if (currentText && currentText !== lastInsertedText && currentText.length > 10) {
+        if (refinementTimeout) {
+          clearTimeout(refinementTimeout);
+        }
+
+        refinementTimeout = setTimeout(() => {
+          requestRefinement(currentText);
+        }, 1000);
+      }
+    });
+  }
+
+  // Request text refinement from service worker
+  function requestRefinement(text) {
+    if (!state.apiKey || !currentTweet) return;
+
+    chrome.runtime.sendMessage({
+      type: 'REFINE_TEXT',
+      text: text,
+      originalTweet: {
+        text: currentTweet.text,
+        author: currentTweet.displayName,
+        handle: currentTweet.handle
+      },
+      config: {
+        provider: state.provider,
+        apiKey: state.apiKey,
+        style: state.style,
+        tone: state.tone
+      }
+    });
   }
 
   // Update usage stats
@@ -440,6 +602,8 @@
 
   // Handle reply button clicks
   function handleReplyClick(e) {
+    // Wait for state to load before handling clicks
+    if (!stateLoaded) return;
     if (!state.isEnabled || !state.apiKey) return;
 
     const replyBtn = e.target.closest(SELECTORS.replyBtn);

@@ -8,6 +8,7 @@ class CassprPopup {
       isEnabled: true,
       provider: 'openai',
       apiKey: '',
+      apiKeyValid: null,
       expertise: [],
       style: 'casual',
       tone: 50,
@@ -15,6 +16,7 @@ class CassprPopup {
       autoShow: true,
       includeEmojis: false,
       addHashtags: false,
+      useSidePanel: false,
       stats: {
         repliesGenerated: 0,
         tweetsAnalyzed: 0,
@@ -173,7 +175,26 @@ class CassprPopup {
       await this.saveState();
     });
 
+    this.on('useSidePanel', 'change', async (e) => {
+      this.state.useSidePanel = e.target.checked;
+      await this.saveState();
+      if (e.target.checked) {
+        // Open side panel when enabled - get current window first
+        try {
+          const currentWindow = await chrome.windows.getCurrent();
+          chrome.runtime.sendMessage({
+            type: 'OPEN_SIDE_PANEL',
+            windowId: currentWindow.id
+          });
+        } catch (err) {
+          console.error('[Casspr] Failed to open side panel:', err);
+        }
+      }
+    });
+
     this.on('changeApiKey', 'click', () => this.showApiKeyModal());
+
+    this.on('testApiKey', 'click', () => this.testApiKey());
 
     this.on('resetExtension', 'click', async () => {
       if (confirm('This will delete all your settings and data. Are you sure?')) {
@@ -324,6 +345,63 @@ class CassprPopup {
     this.hideApiKeyModal();
     this.updateSettings();
     this.showToast('API key updated', 'success');
+    // Auto-test new key
+    this.testApiKey();
+  }
+
+  // API Key Testing
+  async testApiKey() {
+    if (!this.state.apiKey) {
+      this.updateApiKeyStatus('error', 'No API key configured');
+      return;
+    }
+
+    const testBtn = document.getElementById('testApiKey');
+    if (testBtn) {
+      testBtn.disabled = true;
+      testBtn.textContent = 'Testing...';
+    }
+
+    this.updateApiKeyStatus('loading', 'Testing connection...');
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: 'TEST_API_KEY',
+        provider: this.state.provider,
+        apiKey: this.state.apiKey
+      });
+
+      if (response?.success) {
+        this.updateApiKeyStatus('success', 'Connected');
+        this.state.apiKeyValid = true;
+        await this.saveState();
+      } else {
+        this.updateApiKeyStatus('error', response?.error || 'Connection failed');
+        this.state.apiKeyValid = false;
+        await this.saveState();
+      }
+    } catch (error) {
+      this.updateApiKeyStatus('error', error.message || 'Test failed');
+      this.state.apiKeyValid = false;
+    }
+
+    if (testBtn) {
+      testBtn.disabled = false;
+      testBtn.textContent = 'Test';
+    }
+  }
+
+  updateApiKeyStatus(status, message) {
+    const icon = document.getElementById('apiKeyStatusIcon');
+    const msg = document.getElementById('apiKeyStatusMsg');
+
+    if (icon) {
+      icon.className = 'status-icon ' + status;
+    }
+    if (msg) {
+      msg.className = 'status-message ' + status;
+      msg.textContent = message;
+    }
   }
 
   // Tag Management
@@ -426,6 +504,22 @@ class CassprPopup {
 
     const hashtags = document.getElementById('addHashtags');
     if (hashtags) hashtags.checked = this.state.addHashtags;
+
+    const sidePanel = document.getElementById('useSidePanel');
+    if (sidePanel) sidePanel.checked = this.state.useSidePanel;
+
+    // Show API key status
+    if (this.state.apiKey) {
+      if (this.state.apiKeyValid === true) {
+        this.updateApiKeyStatus('success', 'Connected');
+      } else if (this.state.apiKeyValid === false) {
+        this.updateApiKeyStatus('error', 'Connection failed');
+      } else {
+        this.updateApiKeyStatus('', 'Not tested');
+      }
+    } else {
+      this.updateApiKeyStatus('', 'No API key');
+    }
 
     // Render editable tags
     const tagsContainer = document.getElementById('editableTags');

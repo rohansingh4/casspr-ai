@@ -1,6 +1,11 @@
 # Dependencies
 node_modules/
 
+# Environment variables (contains API keys - never commit!)
+.env
+.env.local
+.env.*.local
+
 # OS files
 .DS_Store
 Thumbs.db

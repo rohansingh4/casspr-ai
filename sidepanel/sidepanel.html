@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casspr</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="casspr-header">
+      <div class="logo-container">
+        <img class="logo" src="../icons/icon48.png" width="28" height="28" alt="Casspr">
+        <span class="logo-text">Casspr</span>
+      </div>
+      <div class="header-actions">
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span class="status-text">Active</span>
+        </div>
+        <button class="btn-icon" id="openSettings" title="Settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Current Tweet Context -->
+      <section class="tweet-context" id="tweetContext">
+        <div class="context-label">Replying to</div>
+        <div class="tweet-preview" id="tweetPreview">
+          <span class="tweet-author">@username</span>
+          <p class="tweet-text">Select a tweet to reply...</p>
+        </div>
+      </section>
+
+      <!-- Your Input -->
+      <section class="input-section">
+        <label class="input-label">What do you want to say?</label>
+        <textarea
+          id="roughInput"
+          class="rough-input"
+          placeholder="Type your rough thoughts here... e.g., 'agree with this, coding is fun, mention my experience'"
+          rows="3"
+        ></textarea>
+        <button class="btn-generate" id="generateBtn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Generate Replies
+        </button>
+      </section>
+
+      <!-- Suggestions -->
+      <section class="suggestions-section">
+        <div class="suggestions-header">
+          <span class="suggestions-label">Suggestions</span>
+          <button class="btn-text" id="regenerateBtn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <span>Crafting suggestions...</span>
+        </div>
+
+        <div class="suggestions-list" id="suggestionsList">
+          <!-- Suggestions will be inserted here -->
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>Click reply on a tweet to get AI suggestions</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Panel -->
+    <aside class="settings-panel hidden" id="settingsPanel">
+      <div class="settings-header">
+        <button class="btn-back" id="closeSettings">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h2>Settings</h2>
+      </div>
+
+      <div class="settings-content">
+        <div class="setting-group">
+          <label>AI Provider</label>
+          <select id="providerSelect">
+            <option value="openai">OpenAI (GPT-4o-mini)</option>
+            <option value="anthropic">Anthropic (Claude 3.5)</option>
+            <option value="groq">Groq (Llama 3.3)</option>
+            <option value="gemini">Gemini (2.0 Flash)</option>
+          </select>
+        </div>
+
+        <div class="setting-group">
+          <label>API Key</label>
+          <div class="api-key-row">
+            <input type="password" id="apiKeyInput" placeholder="Enter API key" readonly>
+            <button class="btn-icon" id="editApiKey">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>Style</label>
+          <select id="styleSelect">
+            <option value="professional">Professional</option>
+            <option value="casual">Casual</option>
+            <option value="witty">Witty</option>
+            <option value="thoughtful">Thoughtful</option>
+            <option value="provocative">Provocative</option>
+          </select>
+        </div>
+
+        <div class="setting-group">
+          <label>Tone</label>
+          <div class="tone-slider">
+            <span>Friendly</span>
+            <input type="range" id="toneSlider" min="0" max="100" value="50">
+            <span>Expert</span>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>Length</label>
+          <div class="btn-group">
+            <button class="btn-option" data-length="concise">Short</button>
+            <button class="btn-option selected" data-length="medium">Medium</button>
+            <button class="btn-option" data-length="detailed">Long</button>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="includeEmojis">
+            <span>Include emojis</span>
+          </label>
+        </div>
+
+        <div class="setting-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="addHashtags">
+            <span>Add hashtags</span>
+          </label>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <script src="sidepanel.js" type="module"></script>
+</body>
+</html>

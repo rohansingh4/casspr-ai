@@ -11,20 +11,7 @@
     <!-- Header -->
     <header class="casspr-header">
       <div class="logo-container">
-        <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Casspr C Logo - wide opening -->
-          <rect width="32" height="32" rx="7" fill="#000000"/>
-          <g transform="translate(16, 16)">
-            <path
-              d="M 7 -4.5
-                 A 8.5 8.5 0 1 0 7 4.5"
-              fill="none"
-              stroke="#FFFFFF"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </g>
-        </svg>
+        <img class="logo" src="../icons/icon48.png" width="32" height="32" alt="Casspr">
         <span class="logo-text">Casspr</span>
       </div>
       <div class="status-indicator" id="statusIndicator">
@@ -37,20 +24,7 @@
     <section id="onboarding" class="view">
       <div class="onboarding-step" data-step="1">
         <div class="welcome-icon">
-          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Large C Logo - wide opening like cassprAIR -->
-            <rect width="80" height="80" rx="18" fill="#0A0A0C"/>
-            <g transform="translate(40, 40)">
-              <path
-                d="M 17 -11
-                   A 21 21 0 1 0 17 11"
-                fill="none"
-                stroke="#FFFFFF"
-                stroke-width="5"
-                stroke-linecap="round"
-              />
-            </g>
-          </svg>
+          <img src="../icons/icon128.png" width="80" height="80" alt="Casspr">
         </div>
         <h2>Welcome to Casspr</h2>
         <p>Making social media effortless for every startup.</p>
@@ -242,6 +216,11 @@
             </svg>
           </button>
         </div>
+        <div class="api-key-status" id="apiKeyStatus">
+          <span class="status-icon" id="apiKeyStatusIcon"></span>
+          <span class="status-message" id="apiKeyStatusMsg">Not tested</span>
+          <button class="btn-test" id="testApiKey">Test</button>
+        </div>
       </div>
 
       <div class="settings-section">
@@ -274,6 +253,15 @@
           <input type="checkbox" id="addHashtags" />
           <span>Suggest relevant hashtags</span>
         </label>
+      </div>
+
+      <div class="settings-section">
+        <h4>View Mode</h4>
+        <label class="checkbox-row">
+          <input type="checkbox" id="useSidePanel" />
+          <span>Open in side panel</span>
+        </label>
+        <p class="setting-hint">Use a side panel view for more space</p>
       </div>
 
       <div class="settings-footer">
