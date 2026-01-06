@@ -561,3 +561,225 @@ body {
   font-size: 14px;
   color: var(--text-primary);
 }
+
+/* ========================================
+   LinkedIn Theme - Professional Blue
+   ======================================== */
+body[data-platform="linkedin"] {
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-tertiary: #1B2028;
+  --border-color: rgba(10, 102, 194, 0.3);
+  --accent: #0A66C2;
+  --accent-light: #70B5F9;
+  --success: #0A66C2;
+}
+
+body[data-platform="linkedin"] .casspr-header {
+  background: linear-gradient(180deg, #161B22 0%, #0D1117 100%);
+  border-bottom: 1px solid rgba(10, 102, 194, 0.3);
+}
+
+body[data-platform="linkedin"] .logo-text {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .status-dot {
+  background: #0A66C2;
+}
+
+body[data-platform="linkedin"] .status-indicator {
+  background: rgba(10, 102, 194, 0.15);
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .tweet-context {
+  background: rgba(10, 102, 194, 0.1);
+  border-color: rgba(10, 102, 194, 0.3);
+}
+
+body[data-platform="linkedin"] .tweet-context.has-tweet {
+  border-color: #0A66C2;
+  background: linear-gradient(135deg, rgba(10, 102, 194, 0.15) 0%, transparent 50%);
+}
+
+body[data-platform="linkedin"] .tweet-context.has-tweet .context-label {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .context-label {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .rough-input {
+  background: rgba(10, 102, 194, 0.1);
+  border-color: rgba(10, 102, 194, 0.3);
+}
+
+body[data-platform="linkedin"] .rough-input:focus {
+  border-color: #0A66C2;
+  box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+}
+
+body[data-platform="linkedin"] .rough-input::placeholder {
+  color: #70B5F9;
+  opacity: 0.6;
+}
+
+body[data-platform="linkedin"] .btn-generate {
+  background: #0A66C2;
+  color: #FFFFFF;
+}
+
+body[data-platform="linkedin"] .btn-generate:hover {
+  background: #004182;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.4);
+}
+
+body[data-platform="linkedin"] .spinner {
+  border-color: rgba(10, 102, 194, 0.3);
+  border-top-color: #0A66C2;
+}
+
+body[data-platform="linkedin"] .loading {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .suggestions-label {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .btn-text {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .btn-text:hover {
+  color: #FFFFFF;
+  background: rgba(10, 102, 194, 0.2);
+}
+
+body[data-platform="linkedin"] .suggestion-item {
+  background: rgba(10, 102, 194, 0.1);
+  border-color: rgba(10, 102, 194, 0.2);
+}
+
+body[data-platform="linkedin"] .suggestion-item:hover {
+  border-color: #0A66C2;
+  background: rgba(10, 102, 194, 0.2);
+}
+
+body[data-platform="linkedin"] .btn-copy {
+  background: rgba(10, 102, 194, 0.2);
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .btn-copy:hover {
+  background: rgba(10, 102, 194, 0.4);
+  color: #FFFFFF;
+}
+
+body[data-platform="linkedin"] .btn-copy.success {
+  background: rgba(10, 102, 194, 0.3);
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .btn-use {
+  background: #0A66C2;
+  color: #FFFFFF;
+}
+
+body[data-platform="linkedin"] .btn-use:hover {
+  background: #004182;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.4);
+}
+
+body[data-platform="linkedin"] .empty-state {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .empty-state svg {
+  stroke: #0A66C2;
+}
+
+/* LinkedIn Settings Panel */
+body[data-platform="linkedin"] .settings-header {
+  background: linear-gradient(180deg, #161B22 0%, #0D1117 100%);
+  border-bottom-color: rgba(10, 102, 194, 0.3);
+}
+
+body[data-platform="linkedin"] .btn-back:hover {
+  background: rgba(10, 102, 194, 0.2);
+}
+
+body[data-platform="linkedin"] .setting-group > label {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .setting-group select {
+  background: rgba(10, 102, 194, 0.1);
+  border-color: rgba(10, 102, 194, 0.3);
+}
+
+body[data-platform="linkedin"] .setting-group select:focus {
+  border-color: #0A66C2;
+}
+
+body[data-platform="linkedin"] .api-key-row input {
+  background: rgba(10, 102, 194, 0.1);
+  border-color: rgba(10, 102, 194, 0.3);
+}
+
+body[data-platform="linkedin"] .tone-slider {
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .tone-slider input[type="range"] {
+  background: rgba(10, 102, 194, 0.3);
+}
+
+body[data-platform="linkedin"] .tone-slider input[type="range"]::-webkit-slider-thumb {
+  background: #0A66C2;
+}
+
+body[data-platform="linkedin"] .btn-option {
+  background: rgba(10, 102, 194, 0.1);
+  border-color: rgba(10, 102, 194, 0.3);
+  color: #70B5F9;
+}
+
+body[data-platform="linkedin"] .btn-option:hover {
+  border-color: #0A66C2;
+}
+
+body[data-platform="linkedin"] .btn-option.selected {
+  background: #0A66C2;
+  color: #FFFFFF;
+  border-color: #0A66C2;
+}
+
+body[data-platform="linkedin"] .checkbox-label input {
+  accent-color: #0A66C2;
+}
+
+body[data-platform="linkedin"] .btn-icon:hover {
+  background: rgba(10, 102, 194, 0.2);
+  color: #70B5F9;
+}
+
+/* Scrollbar for LinkedIn */
+body[data-platform="linkedin"] ::-webkit-scrollbar {
+  width: 6px;
+}
+
+body[data-platform="linkedin"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body[data-platform="linkedin"] ::-webkit-scrollbar-thumb {
+  background: rgba(10, 102, 194, 0.4);
+  border-radius: 3px;
+}
+
+body[data-platform="linkedin"] ::-webkit-scrollbar-thumb:hover {
+  background: #0A66C2;
+}

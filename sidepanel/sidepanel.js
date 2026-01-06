@@ -22,10 +22,28 @@ class CassprSidePanel {
 
   async init() {
     await this.loadState();
+    await this.detectPlatform();
     this.bindEvents();
     this.updateUI();
     this.listenForMessages();
     this.listenForStorageChanges();
+  }
+
+  // Detect which platform the user is on and apply theme
+  async detectPlatform() {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab?.url?.includes('linkedin.com')) {
+        this.currentPlatform = 'linkedin';
+        document.body.dataset.platform = 'linkedin';
+      } else {
+        this.currentPlatform = 'twitter';
+        document.body.dataset.platform = 'twitter';
+      }
+    } catch (e) {
+      this.currentPlatform = 'twitter';
+      document.body.dataset.platform = 'twitter';
+    }
   }
 
   // Listen for storage changes to keep in sync with popup settings
@@ -168,6 +186,11 @@ class CassprSidePanel {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.type === 'TWEET_SELECTED') {
         this.currentTweet = message.tweet;
+        // Update theme if platform info is included
+        if (message.tweet?.platform) {
+          this.currentPlatform = message.tweet.platform;
+          document.body.dataset.platform = message.tweet.platform;
+        }
         this.updateTweetContext();
         // Show loading - content script already triggered generation
         this.isGenerating = true;

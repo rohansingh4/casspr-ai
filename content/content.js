@@ -120,6 +120,7 @@
   function createSuggestionPanel() {
     const panel = document.createElement('div');
     panel.id = 'casspr-suggestion-panel';
+    panel.dataset.platform = PLATFORM; // Add platform for CSS theming
     panel.innerHTML = `
       <div class="casspr-panel-header">
         <div class="casspr-logo">
@@ -221,7 +222,8 @@
         tweet: {
           text: tweet.text,
           author: tweet.displayName,
-          handle: tweet.handle
+          handle: tweet.handle,
+          platform: tweet.platform || PLATFORM
         }
       }).catch(() => {}); // Side panel may not be open
     } catch (e) {

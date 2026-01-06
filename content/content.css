@@ -355,3 +355,134 @@
   outline: 2px solid #FFFFFF;
   outline-offset: 2px;
 }
+
+/* ========================================
+   LinkedIn Theme - Professional Blue
+   ======================================== */
+#casspr-suggestion-panel[data-platform="linkedin"] {
+  background: linear-gradient(180deg, #1B1F23 0%, #0D1117 100%);
+  border: 1px solid #0A66C2;
+  box-shadow: 0 8px 32px rgba(10, 102, 194, 0.3), 0 0 0 1px rgba(10, 102, 194, 0.2);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-panel-header {
+  border-bottom: 1px solid rgba(10, 102, 194, 0.3);
+  background: linear-gradient(180deg, rgba(10, 102, 194, 0.15) 0%, transparent 100%);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-logo {
+  color: #70B5F9;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-input-section {
+  border-bottom: 1px solid rgba(10, 102, 194, 0.3);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-rough-input {
+  background: rgba(10, 102, 194, 0.1);
+  border: 1px solid rgba(10, 102, 194, 0.3);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-rough-input:focus {
+  border-color: #0A66C2;
+  box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-rough-input::placeholder {
+  color: #70B5F9;
+  opacity: 0.6;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-close-btn:hover {
+  background: rgba(10, 102, 194, 0.2);
+  color: #70B5F9;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-spinner {
+  border-color: rgba(10, 102, 194, 0.3);
+  border-top-color: #0A66C2;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-loading {
+  color: #70B5F9;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-suggestion {
+  background: rgba(10, 102, 194, 0.1);
+  border: 1px solid transparent;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-suggestion:hover {
+  background: rgba(10, 102, 194, 0.2);
+  border-color: rgba(10, 102, 194, 0.4);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-copy-btn {
+  background: rgba(10, 102, 194, 0.2);
+  color: #70B5F9;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-copy-btn:hover {
+  background: rgba(10, 102, 194, 0.4);
+  color: #FFFFFF;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-copy-btn.casspr-btn-success {
+  background: rgba(10, 102, 194, 0.3);
+  color: #70B5F9;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-use-btn {
+  background: #0A66C2;
+  color: #FFFFFF;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-use-btn:hover {
+  background: #004182;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.4);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-refined {
+  border-color: #0A66C2;
+  background: rgba(10, 102, 194, 0.1);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-refined-label {
+  color: #70B5F9;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-use-refined {
+  background: #0A66C2;
+  color: #FFFFFF;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-use-refined:hover {
+  background: #004182;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-panel-footer {
+  border-top: 1px solid rgba(10, 102, 194, 0.3);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-regenerate-btn {
+  border-color: rgba(10, 102, 194, 0.4);
+  color: #70B5F9;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-regenerate-btn:hover {
+  border-color: #0A66C2;
+  color: #FFFFFF;
+  background: rgba(10, 102, 194, 0.2);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-panel-content::-webkit-scrollbar-thumb {
+  background: rgba(10, 102, 194, 0.4);
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-panel-content::-webkit-scrollbar-thumb:hover {
+  background: #0A66C2;
+}
+
+#casspr-suggestion-panel[data-platform="linkedin"] .casspr-error {
+  color: #F87171;
+}
